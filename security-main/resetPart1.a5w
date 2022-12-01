@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html>
+<meta name="generator" content="Alpha Anywhere HTML Editor Version 12 Build 7340-5549">
+<!-- must use in order to make XP Themes render -->
+<meta HTTP-EQUIV="MSThemeCompatible" content="Yes" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />            
+<head>
+<title></title>
+</head>
+<body><div><br></div><div><br></div><div>
+<p ></p></div>
+
+
+
+
+
+<div>
+
+
+<div style="max-width:500px; margin-left:auto; margin-right:auto; text-align:center; font-family: arial; font-size:14px">
+
+<%a5
+'
+'This is resetPart1 - where a user passes in a GUID, and depending on whether it's accepted, 
+'they are taken to part 2, where they can enter a new password.
+'
+'
+'Pseudocode for this page.
+'
+'
+'Look for a GUID in the link. 
+'    If the GUID is not found or not found in the PWreset database, display a message that we could not process your request
+'    If the GUID is found but expired, display a message, we're sorry but your reset link has expired. Click here to get a new one.
+'    If the GUID is found but used, display the password reset link is no longer valid. Click here to get a new one.
+'
+'If the GUID is found, then
+'   Reset the user's password to a system generated password (and remember the password)
+'   Mark the PWreset record as used. 
+'   Log in the user using their new password.
+'   Take them to the resetPart2 page.
+'  
+
+
+
+
+
+
+
+
+
+
+
+
+
+function findPWReset as p (guid as C)
+
+
+	findPWReset.text = "I found the following GUID: "+guid	
+
+'DIM a SQL arguments object
+dim args as sql::arguments
+
+
+'DIM an Xbasic AlphaDAO connection object
+dim cn as sql::connection
+dim flag as l
+''open the connection object to connect to the Database
+flag = cn.open("::Name::[[YOUR CONNECTION STRING NAME]]")
+dim sql as c
+sql = "SELECT ID, GUID, EMAIL, TIMESTAMP, USED FROM PWreset  WHERE GUID = '"+guid+"'"
+'turn portable SQL on. (for more information on portable sql search in help (https://www.alphasoftware.com/documentation)
+'execute the SQL - pass in the sql::arguments object
+flag = cn.execute(sql,args)
+if flag = .f. then 
+	'an error occurred - get the error message from cn.callresult.text 
+	'report the error, close the database and then end the script
+	dim errortext as c 
+	errortext = cn.callresult.text
+	cn.close()
+end if
+'DIM a SQL::Resultset object
+dim rs as sql::resultset
+rs = cn.resultset
+'get the JSON from the query
+dim json as c 
+json = rs.toJSON()
+'Clean up by freeing the resultset and then closing the database
+cn.freeresult()
+cn.close()
+
+p = json_parse(json)
+
+
+if p.size() <> 1 then
+	findPWReset.error = .t.
+else
+    findPWReset.error = .f.
+    findPWReset.id = p[1].id
+    findPWReset.guid = p[1].guid
+    findPWReset.email = p[1].email
+    findPWReset.timestamp = p[1].timestamp
+    findPWReset.used = p[1].used
+end if
+
+
+
+end function
+
+
+guid = Context.Request.QueryString.Get("guid")
+if guid = "" then
+	? "We could not process your request"
+	end
+else
+	r = findPWReset(guid)
+	if r.error then
+		? "We could not process your request"
+	    end
+    else if r.used="T"
+        ? "This reset link has already been used. To get a new password, <a href='requestReset.a5w'>go here</a>" 
+        end
+
+    else if (now() - convert_type(r.timestamp,"t"))/60 > 20
+		? "This reset link has expired. To get a new password, <a href='requestReset.a5w'>go here</a>"
+        end
+	end if
+end if	
+
+
+
+newPassword  = context.security.resetPassword(r.email)
+
+
+'   These two lines are test code.
+'	?"GUID is found. Just Once. It hasn't been used, and it hasn't expired<br/>"
+'   ?" Your new password is: "+newPassword
+
+
+'Update the USED flag in the database so that the link can't be used again.
+dim cn as sql::connection
+dim flag as l 
+flag = cn.open("::Name::[[YOUR CONNECTION STRING NAME]]")
+if flag = .f. then 
+	'there was an error
+	dim errorText as c 
+	errorText = cn.callresult.text
+	end
+end if 
+'turn on portable SQL
+cn.PortableSQLEnabled = .t.
+dim SQL as c 
+sql = "UPDATE PWreset SET USED = :USED WHERE GUID = :GUID"
+dim args as sql::arguments
+args.add("USED",convert_type("\"1\"","L"))
+args.add("guid",guid)
+
+
+'If the audit feature for the web project is turned on, capture the data to be written to the audit log BEFORE the update takes place
+dim dataJson as c
+dataJson = a5Helper_getAuditInfoFromSQLStatement(cn,sql,args.xml)
+
+'execute the SQL
+flag = cn.execute(sql,args)
+if flag = .f. then 
+	'there was an error
+	dim errorText as c 
+	errorText = cn.callresult.text
+	cn.close()
+	end
+end if 
+dim rowsUpdated as n 
+'get the number of rows that were updated
+rowsUpdated = cn.CallResult.rowsaffected
+
+'write to the audit table log (if auditing is not turned on, this command does nothing)
+a5Helper_writeToAuditingLog(cn,"update",dataJson,"specify table primary key","specify primary key of record that was updated")
+
+cn.close()
+
+
+
+
+Context.Session.Variables.email = r.email
+Context.Session.Variables.password = newPassword
+
+'Login in the user and redirect them to a change password page.
+context.Security.Login(r.email,newPassword,"resetpart2.a5w")
+if context.Security.CallResult.Success
+    if Context.Security.CallResult.ReturnDataValue <> ""           ' has a redirect
+        response.redirect(Context.Security.CallResult.ReturnDataValue)
+    end if
+end if
+
+%>
+
+</div>
+
+
+</div>

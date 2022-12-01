@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+<meta name="generator" content="Alpha Anywhere HTML Editor Version 12 Build 7340-5549">
+<!-- must use in order to make XP Themes render -->
+<meta HTTP-EQUIV="MSThemeCompatible" content="Yes" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />            
+<head>
+
+
+<%a5
+Delete tmpl_USERCHANGEPASSW
+DIM tmpl_USERCHANGEPASSW as P
+tmpl_USERCHANGEPASSW = a5w_load_component("userChangePassword") ''SYSTEM GENERATED COMMENT - PLEASE DO NOT REMOVE (LOAD:userChangePassword)
+
+'Override settings start -----------------------------------------
+with tmpl_USERCHANGEPASSW
+.alias = "USERCHANGEPASSW"
+_dialogFilename = "userChangePassword"
+end with 
+'Override settings end -----------------------------------------
+
+delete x_USERCHANGEPASSW
+dim x_USERCHANGEPASSW as p
+x_USERCHANGEPASSW = a5w_run_Component(tmpl_USERCHANGEPASSW) 'SYSTEM GENERATED COMMENT - PLEASE DO NOT REMOVE (RUN:tmpl) (EDIT:userChangePassword)
+
+?x_USERCHANGEPASSW.Output.Head.JavaScript
+?x_USERCHANGEPASSW.Output.Head.CSS_Link
+
+?x_USERCHANGEPASSW.Output.Head.Title 
+%>
+
+
+<!--Alpha Five Temporary Code Start - Will be automatically removed when page is published -->
+<!--CSS for tmpl -->
+<link rel="stylesheet" type="text/css" href="file:///C:/Program Files (x86)/a5V12/css/Alpha-Blue/style.css">
+<!--Alpha Five Temporary Code End -->
+
+
+
+<title></title>
+</head>
+
+<body class="page">
+
+<%A5 ?x_USERCHANGEPASSW.Output.Body.Dialog2_HTML %>
+<%A5 ?a5dialogHelper_generateCORSHeaders() %>
+</body></html>

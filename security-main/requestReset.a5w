@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html>
+<meta name="generator" content="Alpha Anywhere HTML Editor Version 12 Build 7340-5549">
+<!-- must use in order to make XP Themes render -->
+<meta HTTP-EQUIV="MSThemeCompatible" content="Yes" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />            
+<head>
+
+
+<%a5
+Delete tmpl_REQUESTRESET
+DIM tmpl_REQUESTRESET as P
+tmpl_REQUESTRESET = a5w_load_component("requestReset") ''SYSTEM GENERATED COMMENT - PLEASE DO NOT REMOVE (LOAD:requestReset)
+
+'Override settings start -----------------------------------------
+with tmpl_REQUESTRESET
+.alias = "REQUESTRESET"
+_dialogFilename = "requestReset"
+end with 
+'Override settings end -----------------------------------------
+
+delete x_REQUESTRESET
+dim x_REQUESTRESET as p
+x_REQUESTRESET = a5w_run_Component(tmpl_REQUESTRESET) 'SYSTEM GENERATED COMMENT - PLEASE DO NOT REMOVE (RUN:tmpl) (EDIT:requestReset)
+
+?x_REQUESTRESET.Output.Head.JavaScript
+?x_REQUESTRESET.Output.Head.CSS_Link
+
+?x_REQUESTRESET.Output.Head.Title 
+%>
+
+
+<!--Alpha Five Temporary Code Start - Will be automatically removed when page is published -->
+<!--CSS for tmpl -->
+<link rel="stylesheet" type="text/css" href="file:///C:/Program Files (x86)/a5V12/css/Alpha-Blue/style.css">
+<!--Alpha Five Temporary Code End -->
+
+
+
+<title></title>
+</head>
+
+<body class="page">
+
+
+<p style="display:none;">
+This is the Request Reset page where a user
+enters their email address to request a reset password
+link be sent to them.
+
+Psuedocode
+
+When user clicks the submit button,
+The email textbox and the submit button dissappear. 
+A message appears indicating that there request has been submitted, and
+to please check their inbox for a message containing the 
+password reset link.
+
+The email address is checked against the database.
+
+If no match is found, the process ends.
+
+Otherwise
+
+A record is written to PWreset database.
+PWreset TABLE 
+	guid - guid
+	email - character
+	timestamp - datetime
+	used - logical
+
+Next an email is created:
+
+To: email address submitted
+From: no-reply-Alpha Anywhere
+Subject: Password Reset
+
+Hello,
+
+A password reset request has been submitted.
+Please use the link below to reset your password.
+href link = "resetPart1?guid=xxxxxxxxxx"
+
+The reset link is valid for 2 hours. 
+
+If you belive you received this message in error, you 
+do not need to do anything, and your password 
+will not be changed.
+
+The process ends
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p></p>
+<%A5 ?x_REQUESTRESET.Output.Body.Dialog2_HTML %>
+<%A5 ?a5dialogHelper_generateCORSHeaders() %>
+</body></html>
